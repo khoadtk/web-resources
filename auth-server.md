@@ -3,6 +3,7 @@
 Bên dưới các dịch vụ auth (Clerk, NextAuth) là những cơ chế này — hiểu để dùng đúng và debug được.
 
 > Tổng quan + thư viện ở [auth.md](auth.md). File này đào phần nền, không gắn framework.
+> Phần "bạn được làm gì" (authorization) đi sâu riêng ở [authorization.md](authorization.md).
 
 ## Lưu mật khẩu — hash, không phải mã hoá
 
