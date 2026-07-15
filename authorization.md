@@ -64,28 +64,42 @@ function can(user: User, permission: string): boolean {
 
 ## 3. ABAC — Attribute-Based Access Control
 
-**Ý tưởng:** quyết định dựa trên **thuộc tính** của chủ thể, tài nguyên, và ngữ cảnh — viết thành rule.
+**Ý tưởng:** quyết định bằng cách **so thuộc tính với thuộc tính**, thay vì so user với một danh sách role tĩnh. Thuộc tính (attribute) là dữ liệu sẵn có trên mỗi bên:
+
+- Của **user**: phòng ban, chi nhánh, level, `tenant_id`
+- Của **tài nguyên**: chi nhánh sở hữu, trạng thái, độ mật, `tenant_id`
+- Của **bối cảnh**: giờ, IP, thiết bị
+
+### Thấy rõ nhất khi so với RBAC trên cùng một bài toán
+
+Bài toán: *"Editor chỉ được sửa bài của chi nhánh mình"* (công ty có HN, HCM, ĐN).
 
 ```
-CHO PHÉP edit document KHI:
-  user.department == document.department
-  AND user.level >= 3
-  AND request.time trong giờ làm việc
-  AND document.status != 'archived'
+RBAC thuần — role là nhãn tĩnh, phải đẻ role theo chi nhánh:
+  editor_hn / editor_hcm / editor_dn     ← mở chi nhánh thứ 4? thêm role thứ 4 (role explosion)
+
+ABAC — MỘT rule, không liệt kê chi nhánh nào:
+  user.role == 'editor' AND user.branch == post.branch
 ```
+
+Rule không nói "được sửa bài HN" mà nói "chi nhánh hai bên phải **khớp nhau**" — nên mở thêm 10 chi nhánh cũng không sửa gì. Chạy thử với data:
 
 ```ts
-function canEdit(user: User, doc: Document, ctx: Context): boolean {
-  return user.department === doc.department
-      && user.level >= 3
-      && ctx.isBusinessHours
-      && doc.status !== 'archived';
+const alice = { role: 'editor', branch: 'HN' };
+
+canEdit(alice, { branch: 'HN' });   // 'editor' ✓, 'HN' === 'HN' ✓  → CHO SỬA
+canEdit(alice, { branch: 'HCM' });  // 'editor' ✓, 'HN' !== 'HCM' ✗ → CHẶN
+
+function canEdit(user: User, post: Post): boolean {
+  return user.role === 'editor' && user.branch === post.branch;
 }
 ```
 
-**Usecase:** quy tắc phụ thuộc **ngữ cảnh & dữ liệu động** — hệ thống tài chính/y tế ("bác sĩ chỉ xem hồ sơ bệnh nhân *khoa mình*"), multi-tenant ("user chỉ thấy data *tenant của mình*" — chính là rule ABAC một thuộc tính), **AWS IAM policy** (condition theo tag, IP, giờ) là ABAC quy mô lớn nhất thực tế.
+Điểm mấu chốt: cùng là editor nhưng quyền của alice **thay đổi theo từng bài viết** — RBAC thuần không diễn đạt được điều này (role của alice có đổi đâu). Rule còn cộng dồn thêm điều kiện ngữ cảnh được: `&& ctx.isBusinessHours && post.status !== 'archived'`.
 
-**Giới hạn:** khó trả lời ngược "user này được đụng *những* tài nguyên nào?" (phải quét/dịch rule thành query); rule rải trong code lâu ngày thành mê cung — nên gom về một chỗ (mục 5).
+**Usecase:** quy tắc phụ thuộc **dữ liệu & ngữ cảnh** — **multi-tenant** ("user chỉ thấy data tenant mình": `WHERE tenant_id = user.tenant_id` chính là ABAC một thuộc tính mà bạn có thể đã dùng hằng ngày), y tế/tài chính ("bác sĩ chỉ xem hồ sơ bệnh nhân *khoa mình*"), **AWS IAM policy** (condition theo tag/IP/giờ) là ABAC quy mô lớn nhất thực tế.
+
+**Giới hạn:** khó trả lời ngược "user này được đụng *những* tài nguyên nào?" (phải dịch rule thành query — vd rule branch ở trên thành `WHERE branch = 'HN'`); rule rải trong code lâu ngày thành mê cung — nên gom về một chỗ (mục 5).
 
 ## 4. ReBAC — Relationship-Based Access Control
 
