@@ -60,6 +60,7 @@ cách dùng + copy vào code". Mỗi chủ đề là một file riêng.
 - [Logging & Observability](logging-observability.md) — structured log, request id, health check, metrics
 - [Auth phía server](auth-server.md) — hash mật khẩu, session vs JWT, refresh token, OAuth flow
 - [Phân quyền (Authorization)](authorization.md) — ACL, RBAC, ABAC, ReBAC, policy-as-code + usecase
+  - [Deep-dive: Phân quyền trong NestJS](authorization-nestjs.md) — Guard, decorator, CASL, OpenFGA
 - [API security](api-security.md) — validate biên, BOLA/IDOR, rate limit, OWASP API Top 10
 - [Concurrency & Transaction](concurrency-transactions.md) — race condition, lock, isolation, idempotency
 - [Message queue & Event](message-queue.md) — queue vs pub/sub, at-least-once, DLQ, outbox

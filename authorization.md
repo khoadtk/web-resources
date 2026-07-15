@@ -2,6 +2,8 @@
 
 Authentication trả lời "**bạn là ai**" ([auth-server.md](auth-server.md)); authorization trả lời "**bạn được làm gì**". File này đi sâu 5 mô hình phân quyền phổ biến, usecase của từng loại, và cách chọn.
 
+> Ví dụ cài đặt trên NestJS (Guard, CASL, OpenFGA): [authorization-nestjs.md](authorization-nestjs.md)
+
 ## Bài toán chung
 
 Mọi hệ thống phân quyền đều đang trả lời một câu hỏi dạng:
