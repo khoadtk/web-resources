@@ -103,45 +103,75 @@ function canEdit(user: User, post: Post): boolean {
 
 ## 4. ReBAC — Relationship-Based Access Control
 
-**Ý tưởng:** quyền suy ra từ **quan hệ** giữa chủ thể và tài nguyên, kể cả quan hệ *bắc cầu* — mô hình của **Google Zanzibar** (hệ phân quyền chung cho Docs/Drive/YouTube).
+**Ý tưởng — trả lời câu hỏi "quyền lưu ở đâu?":** ACL lưu quyền *trên tài nguyên*; RBAC lưu *trên user* (role). ReBAC **không lưu quyền ở đâu cả** — hệ thống **tự suy ra** từ các mối quan hệ, kể cả quan hệ nối tiếp nhau (bắc cầu). Đây là mô hình của **Google Zanzibar** (hệ phân quyền chung cho Drive/Docs/YouTube).
+
+### Ví dụ bạn dùng hằng ngày: share folder Google Drive
+
+Share một **folder** cho bob → bob mở được **mọi file bên trong**, kể cả file thêm vào sau. Không ai ghi dòng quyền nào cho từng file — DB chỉ có 2 dòng *quan hệ*:
 
 ```
-alice --owner--> folder:baocao --parent--> doc:q3
-bob   --member--> group:ketoan --viewer--> folder:baocao
+bob --viewer--> folder:BaoCao
+folder:BaoCao --chứa--> doc:Q3
 
-→ alice edit được doc:q3 (owner folder cha)
-→ bob xem được doc:q3 (thành viên nhóm được share folder cha)
+Hỏi: bob xem được doc:Q3 không?
+Không có dòng nào nói "bob → doc:Q3"!
+Hệ thống tự suy: bob là viewer của folder → folder chứa doc → ĐƯỢC XEM
 ```
 
-Check quyền = **tìm đường đi trong đồ thị quan hệ**. Tự cài phức tạp, thường dùng hệ có sẵn: **OpenFGA** (mã nguồn mở, chuẩn Zanzibar), SpiceDB, Ory Keto.
-
-**Usecase:** quyền **kế thừa theo cây và nhóm** — Google Drive (share folder → cả cây con), GitHub (quyền repo qua org → team → member), mạng xã hội ("chỉ bạn-của-bạn xem được"), B2B nhiều tầng (agency quản lý nhiều client). Khi bạn nghe yêu cầu "share cho nhóm, nhóm nằm trong nhóm khác, folder kế thừa từ cha" — đó là ReBAC.
-
-**Giới hạn:** thêm một hệ thống ngoài để vận hành; overkill cho app có cấu trúc quyền phẳng.
-
-## 5. PBAC / Policy-as-code — tách policy ra khỏi app
-
-**Ý tưởng:** không phải mô hình dữ liệu mới, mà là **cách tổ chức**: dồn mọi luật (RBAC/ABAC/hỗn hợp) vào **một chỗ tách khỏi business code**, viết bằng ngôn ngữ policy, app chỉ hỏi "được không?".
+Check quyền = **tìm đường đi trong đồ thị quan hệ**. Chuỗi dài mấy cũng được:
 
 ```
-App ──"alice, edit, doc:42, context"──> Policy engine (OPA/Cedar/Casbin)
-    <──────── allow / deny ────────────  (đọc policy + data để quyết)
+alice --thuộc--> team:KeToan --thuộc--> phong:TaiChinh --viewer--> folder:BaoCao
+→ alice có quyền qua 3 bước nhảy (nhóm lồng nhóm)
+```
+
+### Vì sao không dùng ACL cho việc này?
+
+Share folder 1000 file bằng ACL = insert **1000 dòng quyền**, thêm file mới phải nhớ thêm quyền. ReBAC = **1 dòng quan hệ**, file mới bỏ vào folder là tự được share. Đổi lại, tìm đường trên đồ thị tỷ-cạnh là bài toán khó — nên thực tế dùng hệ chuyên dụng: **OpenFGA** (mã nguồn mở, chuẩn Zanzibar), SpiceDB, Ory Keto.
+
+**Usecase:** quyền **kế thừa theo cây và nhóm** — Google Drive (share folder → cả cây con), GitHub (quyền repo qua org → team → member), mạng xã hội ("chỉ bạn-của-bạn xem được"), B2B nhiều tầng (agency quản lý nhiều client). Nghe yêu cầu "share cho nhóm, nhóm nằm trong nhóm khác, folder kế thừa từ cha" — đó là ReBAC.
+
+**Giới hạn:** thêm một hệ thống ngoài để vận hành; overkill cho app có cấu trúc quyền phẳng (không cây, không nhóm lồng nhóm).
+
+## 5. PBAC / Policy-as-code — tách luật ra khỏi app
+
+**Ý tưởng — trả lời một câu hỏi KHÁC hẳn 4 mục trên.** ACL/RBAC/ABAC/ReBAC trả lời "*quyết định dựa vào gì*". PBAC trả lời "**luật viết ở chỗ nào trong hệ thống?**" — giống việc tách config ra `.env` thay vì hard-code URL ([env-config.md](env-config.md)), ở đây là tách **luật phân quyền** ra khỏi business code.
+
+### Trước — luật rải trong code (cách hầu hết app đang làm)
+
+```ts
+// service A
+if (user.role === 'editor' && user.branch === post.branch) { ... }
+
+// service B — 6 tháng sau, người khác viết
+if (user.role === 'editor') { ... }   // ← quên check branch: LỖ HỔNG
+```
+
+Cùng một luật bị copy ra nhiều service, mỗi nơi một dị bản; đổi luật phải sửa mọi nơi, sót một chỗ là thủng.
+
+### Sau — luật nằm một chỗ, app chỉ hỏi
+
+```ts
+// MỌI nơi trong MỌI service chỉ còn đúng một câu hỏi:
+const ok = await authz.check({ user: 'alice', action: 'edit', resource: 'post:42' });
 ```
 
 ```rego
-# ví dụ OPA (ngôn ngữ Rego)
+# còn luật viết MỘT chỗ — ví dụ OPA (ngôn ngữ Rego); nội dung vẫn là rule kiểu ABAC
 allow if {
   input.action == "edit"
-  input.user.department == data.documents[input.resource_id].department
-  input.user.level >= 3
+  input.user.role == "editor"
+  input.user.branch == data.posts[input.resource_id].branch
 }
 ```
 
-Công cụ: **OPA** (chuẩn CNCF, dùng nhiều cho hạ tầng/K8s), **Cedar** (AWS, ngôn ngữ policy có chứng minh hình thức), **Casbin** (thư viện đa ngôn ngữ, nhẹ), **CASL** (JS/TS, dùng được cả FE để ẩn/hiện nút).
+Sửa 1 file policy → mọi service theo ngay; policy nằm trong git → diff được "luật đổi khi nào, ai đổi" (audit). Lưu ý điểm hay nhầm: **bên trong policy bạn vẫn viết luật kiểu RBAC/ABAC như thường** — PBAC chỉ là *chỗ đặt luật*, không phải cách quyết mới; vì vậy bảng so sánh ghi nó "bọc các mô hình trên".
 
-**Usecase:** nhiều service cần **chung một bộ luật** (microservices — sửa policy một chỗ, mọi service theo), yêu cầu **audit** ("vì sao request này được phép?" — policy là văn bản đọc được, version control được), compliance ngành nghiêm ngặt.
+Công cụ: **OPA** (chuẩn CNCF, dùng nhiều cho hạ tầng/K8s), **Cedar** (AWS), **Casbin** (thư viện đa ngôn ngữ, nhẹ), **CASL** (JS/TS — dùng chung định nghĩa quyền cho cả server enforce lẫn FE ẩn/hiện nút).
 
-**Giới hạn:** thêm độ phức tạp vận hành + một ngôn ngữ mới cho team; app đơn thể thì hàm `can()` đặt gọn một module là đủ.
+**Usecase:** **≥2 service cần chung một bộ luật** (microservices), yêu cầu **audit/compliance** ("vì sao request này được phép?" phải trả lời được bằng văn bản), team security muốn quản luật mà không đụng code app.
+
+**Giới hạn:** thêm hạ tầng vận hành + một ngôn ngữ mới cho team. App đơn thể thì **gom hết if vào một hàm `can(user, action, resource)` trong một module** là đủ — đó chính là tinh thần PBAC thu nhỏ (và là lý do common mistakes bên dưới khuyên đừng rải if khắp controller).
 
 ## Bảng chọn nhanh
 
