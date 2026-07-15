@@ -46,6 +46,16 @@ cách dùng + copy vào code". Mỗi chủ đề là một file riêng.
 - [Search](search.md) — Fuse.js, Meilisearch, Algolia, full-text
 - [AI integration](ai-integration.md) — chatbot, embeddings, RAG, Vercel AI SDK
 
+## Backend fundamentals
+
+> Nền tảng BE không gắn framework — dùng được dù code NestJS, Express hay gì khác.
+
+- [HTTP fundamentals](http-fundamentals.md) — method, status code, header, idempotent, curl
+- [REST API design](rest-api-design.md) — đặt tên endpoint, pagination, lỗi thống nhất, OpenAPI
+- [SQL fundamentals](sql-fundamentals.md) — JOIN, index, transaction, N+1, ràng buộc
+- [Networking basics](networking-basics.md) — DNS, TLS, port, reverse proxy, CORS
+- [Logging & Observability](logging-observability.md) — structured log, request id, health check, metrics
+
 ## Web fundamentals
 
 - [SEO & meta tags](seo-meta.md) — Open Graph, favicon, sitemap
