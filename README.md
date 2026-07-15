@@ -3,6 +3,9 @@
 Kho ghi chú các chủ đề tài nguyên & nền tảng liên quan tới web — dạng "tra công cụ +
 cách dùng + copy vào code". Mỗi chủ đề là một file riêng.
 
+> 🔍 **Tra cứu nhanh**: mở [index.html](index.html) trong trình duyệt — có search
+> (không cần gõ dấu) + lọc theo nhóm cho toàn bộ chủ đề.
+
 ## Assets & Design resources
 
 - [Icons](../icon/README.md) — Icônes, Iconify, Lucide... (đã có)
@@ -55,6 +58,14 @@ cách dùng + copy vào code". Mỗi chủ đề là một file riêng.
 - [SQL fundamentals](sql-fundamentals.md) — JOIN, index, transaction, N+1, ràng buộc
 - [Networking basics](networking-basics.md) — DNS, TLS, port, reverse proxy, CORS
 - [Logging & Observability](logging-observability.md) — structured log, request id, health check, metrics
+- [Auth phía server](auth-server.md) — hash mật khẩu, session vs JWT, refresh token, OAuth flow
+- [API security](api-security.md) — validate biên, BOLA/IDOR, rate limit, OWASP API Top 10
+- [Concurrency & Transaction](concurrency-transactions.md) — race condition, lock, isolation, idempotency
+- [Message queue & Event](message-queue.md) — queue vs pub/sub, at-least-once, DLQ, outbox
+- [Server caching sâu](server-caching.md) — cache-aside, invalidation, thundering herd
+- [Webhooks design](webhooks.md) — verify chữ ký, trả 200 nhanh, idempotent, gửi webhook
+- [File & Streaming](file-streaming.md) — stream, backpressure, range request, export lớn
+- [Deployment & Process](deployment-process.md) — graceful shutdown, zero-downtime, expand/contract migration
 
 ## Web fundamentals
 

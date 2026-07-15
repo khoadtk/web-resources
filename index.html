@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Resources — tra cứu</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5c6370; --accent: #2563eb;
+    --card: #f6f8fa; --border: #e2e5e9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115; --fg: #e6e6e6; --muted: #9aa2ad; --accent: #60a5fa;
+      --card: #171a21; --border: #262b33;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
+  h1 { font-size: 1.7rem; margin: 0 0 .25rem; }
+  .lede { color: var(--muted); margin: 0 0 1.5rem; font-size: .95rem; }
+  #q { width: 100%; font: inherit; font-size: 1.05rem; padding: .7rem 1rem;
+       border: 2px solid var(--border); border-radius: 10px; background: var(--card);
+       color: var(--fg); outline: none; }
+  #q:focus { border-color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .9rem 0 .5rem; }
+  .chip { font: inherit; font-size: .82rem; padding: .3rem .75rem; border-radius: 999px;
+          border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+          cursor: pointer; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #count { color: var(--muted); font-size: .85rem; margin: .25rem 0 1.25rem; }
+  .group h2 { font-size: 1.05rem; margin: 1.75rem 0 .6rem; padding-top: .9rem;
+              border-top: 1px solid var(--border); color: var(--muted);
+              text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: .6rem; }
+  .card { display: block; text-decoration: none; color: inherit; background: var(--card);
+          border: 1px solid var(--border); border-radius: 10px; padding: .7rem .9rem;
+          transition: border-color .12s; }
+  .card:hover { border-color: var(--accent); }
+  .card .t { font-weight: 600; color: var(--accent); font-size: .95rem; }
+  .card .d { color: var(--muted); font-size: .82rem; margin-top: .2rem; line-height: 1.45; }
+  .badge { display: inline-block; font-size: .68rem; font-weight: 600; padding: .05rem .45rem;
+           border-radius: 999px; background: color-mix(in srgb, var(--accent) 15%, var(--bg));
+           color: var(--accent); border: 1px solid var(--accent); margin-left: .35rem;
+           vertical-align: 1px; }
+  .empty { color: var(--muted); text-align: center; padding: 3rem 0; }
+  kbd { font-family: ui-monospace, Menlo, monospace; font-size: .8em; background: var(--card);
+        border: 1px solid var(--border); border-radius: 4px; padding: .05em .4em; }
+  #hint { display: none; font-size: .85rem; color: var(--muted); background: var(--card);
+          border: 1px solid var(--border); border-radius: 8px; padding: .6rem .9rem; margin: 0 0 1rem; }
+  /* ---- preview modal ---- */
+  #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+             z-index: 50; align-items: center; justify-content: center; padding: 2rem 1rem; }
+  #panel { background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+           max-width: 820px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; }
+  #phead { display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+           padding: .7rem 1.1rem; border-bottom: 1px solid var(--border); }
+  #phead a { color: var(--accent); font-size: .85rem; margin-right: .75rem; text-decoration: none; }
+  #pclose { font: inherit; background: none; border: 1px solid var(--border); border-radius: 6px;
+            color: var(--fg); cursor: pointer; padding: .15rem .55rem; }
+  .md-body { overflow-y: auto; padding: .5rem 1.4rem 2rem; line-height: 1.6; font-size: .95rem; }
+  .md-body h1 { font-size: 1.35rem; margin: .9rem 0 .5rem; }
+  .md-body h2 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .md-body h3 { font-size: 1rem; margin: 1.1rem 0 .4rem; }
+  .md-body pre { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+                 padding: .8rem; overflow-x: auto; position: relative; }
+  .md-body code { font-family: ui-monospace, Menlo, monospace; font-size: .85em;
+                  background: var(--card); padding: .1em .3em; border-radius: 4px; }
+  .md-body pre code { background: none; padding: 0; font-size: .8rem; display: block; }
+  .md-body blockquote { border-left: 3px solid var(--accent); margin: .75rem 0;
+                        padding: .35rem .9rem; background: var(--card);
+                        border-radius: 0 8px 8px 0; color: var(--muted); }
+  .md-body blockquote p { margin: .25rem 0; }
+  .md-body .twrap { overflow-x: auto; margin: .75rem 0; }
+  .md-body table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+  .md-body th, .md-body td { border: 1px solid var(--border); padding: .4rem .6rem; text-align: left; }
+  .md-body th { background: var(--card); }
+  .md-body a { color: var(--accent); }
+  .md-body hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  .plang { position: absolute; top: .3rem; right: .55rem; font-size: .68rem; color: var(--muted);
+           font-family: ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Web Resources</h1>
+  <p class="lede">Tra cứu nhanh kho ghi chú — gõ <kbd>/</kbd> để search, <kbd>Esc</kbd> để xoá/đóng. Bấm card để <strong>preview ngay tại đây</strong>; <kbd>Ctrl/⌘ + click</kbd> để mở file gốc.</p>
+  <div id="hint"></div>
+  <input id="q" type="search" placeholder="Tìm: upload, kéo thả, jwt, cache, playwright..." autocomplete="off">
+  <div class="chips" id="chips"></div>
+  <div id="count"></div>
+  <div id="list"></div>
+</main>
+<div id="overlay">
+  <div id="panel">
+    <div id="phead">
+      <strong id="md-title"></strong>
+      <span>
+        <a id="md-open" target="_blank">mở file gốc ↗</a>
+        <button id="pclose" aria-label="Đóng">✕</button>
+      </span>
+    </div>
+    <div id="md-body" class="md-body"></div>
+  </div>
+</div>
+<script>
+const DATA = [
+  // ── Assets ──────────────────────────────────────────────
+  { f: "../icon/README.md", t: "Icons", g: "Assets", d: "Icônes, Iconify, Lucide, copy SVG", k: "icon biểu tượng svg iconify lucide" },
+  { f: "fonts.md", t: "Fonts", g: "Assets", d: "Google Fonts, Fontsource, next/font, font-display", k: "chữ typography variable font" },
+  { f: "colors.md", t: "Colors", g: "Assets", d: "Palette, HSL/OKLCH, CSS variable theme, contrast a11y", k: "màu sắc bảng màu tương phản" },
+  { f: "images.md", t: "Images & Photos", g: "Assets", d: "Unsplash, WebP/AVIF, lazy load, next/image", k: "ảnh hình nén tối ưu picture" },
+  { f: "illustrations.md", t: "Illustrations", g: "Assets", d: "unDraw, Storyset, DiceBear avatar, empty state", k: "minh hoạ hình vẽ avatar" },
+  { f: "shadows-gradients.md", t: "Shadows & Gradients", g: "Assets", d: "Bóng nhiều lớp, gradient generator, text gradient", k: "đổ bóng chuyển màu box-shadow" },
+  // ── Visualization ───────────────────────────────────────
+  { f: "charts.md", t: "Charts & Data viz", g: "Visualization", d: "Recharts, Chart.js, ECharts, chọn loại biểu đồ", k: "biểu đồ đồ thị dashboard thống kê" },
+  { f: "maps.md", t: "Maps", g: "Visualization", d: "Leaflet, MapLibre, Mapbox, marker, geocoding", k: "bản đồ toạ độ vị trí" },
+  // ── UI / Component ──────────────────────────────────────
+  { f: "component-libraries.md", t: "Component libraries", g: "UI", d: "shadcn/ui, Radix, Headless UI, Flowbite", k: "thư viện component headless" },
+  { f: "css-layout.md", t: "CSS & Layout", g: "UI", d: "Flexbox, Grid, container query, responsive, Tailwind", k: "dàn trang bố cục căn giữa" },
+  { f: "animations.md", t: "Animations", g: "UI", d: "CSS animation, Framer Motion, Lottie, reduced-motion", k: "chuyển động hiệu ứng transition keyframes" },
+  { f: "forms-validation.md", t: "Forms & Validation", g: "UI", d: "React Hook Form + Zod, Server Actions, báo lỗi", k: "biểu mẫu kiểm tra hợp lệ input schema" },
+  { f: "ui-patterns.md", t: "UI Patterns", g: "UI", d: "Toast (Sonner), skeleton, empty state, error state", k: "thông báo loading trạng thái rỗng lỗi" },
+  { f: "i18n.md", t: "i18n", g: "UI", d: "Đa ngôn ngữ: next-intl, react-i18next, Intl format", k: "dịch ngôn ngữ locale tiếng việt anh" },
+  { f: "dark-mode.md", t: "Dark mode", g: "UI", d: "Sáng/tối, next-themes, chống nhấp nháy FOUC", k: "chế độ tối theme giao diện" },
+  { f: "rich-text-editor.md", t: "Rich text editor", g: "UI", d: "Tiptap, Lexical, Quill, sanitize, autosave", k: "soạn thảo văn bản wysiwyg editor" },
+  { f: "drag-drop.md", t: "Drag & Drop", g: "UI", d: "dnd-kit, SortableJS, kanban, kéo file upload", k: "kéo thả sắp xếp sortable" },
+  { f: "tables.md", t: "Tables & Data grid", g: "UI", d: "TanStack Table, AG Grid, virtualize, phân trang server", k: "bảng dữ liệu sort filter excel" },
+  { f: "video-audio.md", t: "Video & Audio", g: "UI", d: "Player, HLS, Mux, embed YouTube, captions", k: "phát video âm thanh streaming podcast" },
+  { f: "design-system.md", t: "Design system & Figma", g: "UI", d: "Design token, Storybook, Figma Dev Mode, Tokens Studio", k: "hệ thống thiết kế nhất quán token" },
+  // ── Data & Backend (góc nhìn web app) ───────────────────
+  { f: "data-state.md", t: "Data & State", g: "Data & Backend", d: "TanStack Query, Zustand, server vs client state", k: "trạng thái fetch quản lý redux swr" },
+  { f: "api-layer.md", t: "API layer", g: "Data & Backend", d: "REST, GraphQL, tRPC, mutation + invalidate", k: "gọi api axios endpoint" },
+  { f: "database-orm.md", t: "Database & ORM", g: "Data & Backend", d: "Prisma, Drizzle, Supabase, Postgres, migration", k: "cơ sở dữ liệu db truy vấn" },
+  { f: "realtime.md", t: "Realtime", g: "Data & Backend", d: "WebSocket, SSE, Socket.IO, Pusher/Ably", k: "thời gian thực chat notify socket" },
+  { f: "file-upload.md", t: "File upload & Storage", g: "Data & Backend", d: "S3/R2, Cloudinary, UploadThing, presigned URL", k: "tải file lên lưu trữ ảnh" },
+  { f: "payment.md", t: "Payment", g: "Data & Backend", d: "Stripe, webhook, idempotency, VNPay/MoMo", k: "thanh toán tiền thẻ subscription" },
+  { f: "email.md", t: "Email", g: "Data & Backend", d: "Resend, React Email, Nodemailer, SPF/DKIM", k: "gửi mail thư transactional" },
+  { f: "caching.md", t: "Caching & CDN", g: "Data & Backend", d: "Browser/CDN/Redis, cache busting, revalidate", k: "bộ nhớ đệm cache tốc độ" },
+  { f: "queue-cron.md", t: "Queue & Cron", g: "Data & Backend", d: "Background job, BullMQ, QStash, cron schedule", k: "hàng đợi việc nền định kỳ worker" },
+  { f: "search.md", t: "Search", g: "Data & Backend", d: "Fuse.js, Meilisearch, Algolia, full-text, debounce", k: "tìm kiếm lọc fuzzy" },
+  { f: "ai-integration.md", t: "AI integration", g: "Data & Backend", d: "Chatbot, embeddings, RAG, Vercel AI SDK, streaming", k: "trí tuệ nhân tạo llm claude gpt" },
+  // ── Backend fundamentals ────────────────────────────────
+  { f: "http-fundamentals.md", t: "HTTP fundamentals", g: "Backend fundamentals", d: "Method, status code, header, idempotent, curl", k: "giao thức request response 401 403" },
+  { f: "rest-api-design.md", t: "REST API design", g: "Backend fundamentals", d: "Đặt tên endpoint, pagination, khuôn lỗi, OpenAPI", k: "thiết kế api swagger versioning phân trang" },
+  { f: "sql-fundamentals.md", t: "SQL fundamentals", g: "Backend fundamentals", d: "JOIN, index, transaction, N+1, EXPLAIN, ràng buộc", k: "truy vấn cơ sở dữ liệu postgres chậm" },
+  { f: "networking-basics.md", t: "Networking basics", g: "Backend fundamentals", d: "DNS, TLS, port, reverse proxy, 502/504, CORS", k: "mạng kết nối domain https localhost" },
+  { f: "logging-observability.md", t: "Logging & Observability", g: "Backend fundamentals", d: "Structured log (pino), request id, health check, p95", k: "ghi log giám sát metrics trace debug" },
+  { f: "auth-server.md", t: "Auth phía server", g: "Backend fundamentals", d: "Hash bcrypt, session vs JWT, refresh token, OAuth flow", k: "xác thực đăng nhập mật khẩu token phiên" },
+  { f: "api-security.md", t: "API security", g: "Backend fundamentals", d: "Validate biên, BOLA/IDOR, rate limit, OWASP Top 10", k: "bảo mật api tấn công quyền idor" },
+  { f: "concurrency-transactions.md", t: "Concurrency & Transaction", g: "Backend fundamentals", d: "Race condition, lock, isolation, idempotency key", k: "đồng thời tranh chấp khoá giao dịch trùng" },
+  { f: "message-queue.md", t: "Message queue & Event", g: "Backend fundamentals", d: "Queue vs pub/sub, at-least-once, DLQ, outbox pattern", k: "hàng đợi sự kiện kafka rabbitmq" },
+  { f: "server-caching.md", t: "Server caching sâu", g: "Backend fundamentals", d: "Cache-aside, invalidation, thundering herd, jitter TTL", k: "bộ nhớ đệm redis stampede hit rate" },
+  { f: "webhooks.md", t: "Webhooks design", g: "Backend fundamentals", d: "Verify chữ ký, trả 200 nhanh, idempotent, gửi webhook", k: "móc sự kiện stripe callback ngrok" },
+  { f: "file-streaming.md", t: "File & Streaming", g: "Backend fundamentals", d: "Stream, backpressure, range request 206, export lớn", k: "luồng file lớn ram download tua video" },
+  { f: "deployment-process.md", t: "Deployment & Process", g: "Backend fundamentals", d: "Graceful shutdown, zero-downtime, expand/contract migration", k: "triển khai rollback sigterm không rớt" },
+  // ── Web fundamentals ────────────────────────────────────
+  { f: "seo-meta.md", t: "SEO & meta tags", g: "Web fundamentals", d: "Open Graph, favicon, sitemap, Metadata API", k: "tối ưu tìm kiếm google share thẻ meta" },
+  { f: "accessibility.md", t: "Accessibility (a11y)", g: "Web fundamentals", d: "ARIA, keyboard, contrast, screen reader, axe", k: "tiếp cận khuyết tật bàn phím đọc màn hình" },
+  { f: "performance.md", t: "Performance", g: "Web fundamentals", d: "Core Web Vitals, lazy load, code splitting, LCP/CLS", k: "hiệu năng tốc độ nhanh chậm bundle" },
+  { f: "auth.md", t: "Auth (tổng quan)", g: "Web fundamentals", d: "Đăng nhập, session, JWT, OAuth — Clerk, NextAuth", k: "xác thực đăng nhập phân quyền" },
+  { f: "security.md", t: "Security (FE)", g: "Web fundamentals", d: "XSS, CSRF, CSP, sanitize, checklist bảo mật", k: "bảo mật tấn công lỗ hổng innerHTML" },
+  { f: "error-monitoring.md", t: "Error & Monitoring", g: "Web fundamentals", d: "Sentry, error boundary, error.tsx, analytics", k: "lỗi theo dõi crash báo cáo" },
+  { f: "pwa.md", t: "PWA & Offline", g: "Web fundamentals", d: "Manifest, service worker, cài được, cache offline", k: "ứng dụng cài đặt ngoại tuyến" },
+  { f: "feature-flags.md", t: "Feature flags & A/B test", g: "Web fundamentals", d: "PostHog, rollout dần, kill switch, thử nghiệm", k: "bật tắt tính năng thí nghiệm cờ" },
+  { f: "web-workers-wasm.md", t: "Web Workers & WASM", g: "Web fundamentals", d: "Tính toán nặng không đơ UI, Comlink, ffmpeg.wasm", k: "luồng worker webassembly nặng đơ" },
+  { f: "web-workers-wasm-nextjs.md", t: "Workers & WASM trong Next.js", g: "Web fundamentals", d: "SSR-safe, COOP/COEP, transferable, usecase nén ảnh/OCR", k: "worker wasm nextjs sharedarraybuffer", dd: true },
+  // ── Nền tảng khác ───────────────────────────────────────
+  { f: "browser-extension.md", t: "Browser extension", g: "Nền tảng khác", d: "Manifest V3, WXT/Plasmo, content script, popup", k: "tiện ích mở rộng chrome firefox" },
+  // ── Tooling ─────────────────────────────────────────────
+  { f: "dev-utilities.md", t: "Dev utilities", g: "Tooling", d: "transform.tools, regex101, caniuse, SVGOMG", k: "công cụ tiện ích chuyển đổi regex" },
+  { f: "testing.md", t: "Testing (tổng quan)", g: "Tooling", d: "Vitest, Testing Library, Playwright, kim tự tháp test", k: "kiểm thử unit e2e test" },
+  { f: "automation-testing-playwright.md", t: "Playwright (deep-dive)", g: "Tooling", d: "Locator, fixtures, auth state, trace, CI, chống flaky", k: "kiểm thử tự động automation e2e", dd: true },
+  { f: "playwright-cucumber.md", t: "Playwright + Cucumber (BDD)", g: "Tooling", d: "Gherkin, World, step definitions, playwright-bdd", k: "bdd kịch bản given when then", dd: true },
+  { f: "deploy-hosting.md", t: "Deploy & Hosting", g: "Tooling", d: "Vercel, Netlify, Cloudflare, env dashboard, CI/CD", k: "triển khai đưa lên mạng host" },
+  { f: "git-workflow.md", t: "Git workflow", g: "Tooling", d: "Branch, conventional commits, PR, .gitignore", k: "quản lý phiên bản nhánh commit" },
+  { f: "env-config.md", t: "Env & Config", g: "Tooling", d: "Biến môi trường, secret, .env.example, validate Zod", k: "cấu hình bí mật khoá api key" },
+  { f: "typescript-tips.md", t: "TypeScript tips", g: "Tooling", d: "Utility types, as const, z.infer, satisfies", k: "kiểu type generic strict" },
+  { f: "date-time.md", t: "Date & Time", g: "Tooling", d: "Day.js, Intl, UTC/timezone, hydration mismatch", k: "ngày giờ múi giờ thời gian format" },
+  { f: "monorepo.md", t: "Monorepo", g: "Tooling", d: "pnpm workspaces, Turborepo, package shared", k: "nhiều dự án chung repo workspace" },
+  { f: "docker-web.md", t: "Docker cho web", g: "Tooling", d: "Multi-stage Dockerfile, compose dev, standalone Next", k: "container đóng gói image compose" },
+];
+
+const GROUPS = ["Assets", "Visualization", "UI", "Data & Backend", "Backend fundamentals", "Web fundamentals", "Nền tảng khác", "Tooling"];
+
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/Đ/g, "d").toLowerCase();
+DATA.forEach(x => x._s = norm(`${x.t} ${x.d} ${x.k} ${x.f}`));
+
+let query = "", activeGroup = null;
+const q = document.getElementById("q"), list = document.getElementById("list"),
+      count = document.getElementById("count"), chips = document.getElementById("chips");
+
+function makeChip(label, group) {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = label;
+  b.onclick = () => { activeGroup = group; render(); };
+  return b;
+}
+function renderChips() {
+  chips.innerHTML = "";
+  const all = makeChip("Tất cả", null);
+  if (activeGroup === null) all.classList.add("on");
+  chips.appendChild(all);
+  GROUPS.forEach(g => {
+    const c = makeChip(g, g);
+    if (activeGroup === g) c.classList.add("on");
+    chips.appendChild(c);
+  });
+}
+function render() {
+  renderChips();
+  const nq = norm(query.trim());
+  const hits = DATA.filter(x =>
+    (activeGroup === null || x.g === activeGroup) &&
+    (nq === "" || nq.split(/\s+/).every(w => x._s.includes(w)))
+  );
+  count.textContent = `${hits.length}/${DATA.length} chủ đề`;
+  list.innerHTML = "";
+  if (!hits.length) {
+    list.innerHTML = `<p class="empty">Không thấy gì cho “${query}” — thử từ khoá khác?</p>`;
+    return;
+  }
+  GROUPS.forEach(g => {
+    const items = hits.filter(x => x.g === g);
+    if (!items.length) return;
+    const sec = document.createElement("div");
+    sec.className = "group";
+    sec.innerHTML = `<h2>${g} (${items.length})</h2>`;
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    items.forEach(x => {
+      const a = document.createElement("a");
+      a.className = "card"; a.href = x.f;
+      a.innerHTML = `<span class="t">${x.t}</span>${x.dd ? '<span class="badge">deep-dive</span>' : ""}<div class="d">${x.d}</div>`;
+      a.onclick = e => {
+        // Ctrl/⌘/Shift+click hoặc đang mở file:// (fetch bị chặn) → điều hướng như link thường
+        if (e.metaKey || e.ctrlKey || e.shiftKey || location.protocol === "file:") return;
+        e.preventDefault();
+        openPreview(x.f, x.t);
+      };
+      grid.appendChild(a);
+    });
+    sec.appendChild(grid);
+    list.appendChild(sec);
+  });
+}
+q.addEventListener("input", () => { query = q.value; render(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+  if (e.key === "Escape") {
+    if (overlay.style.display === "flex") { closePreview(); return; }
+    q.value = ""; query = ""; render(); q.blur();
+  }
+});
+render();
+
+/* ---------- markdown preview ---------- */
+const overlay = document.getElementById("overlay"),
+      mdBody = document.getElementById("md-body"),
+      mdTitle = document.getElementById("md-title"),
+      mdOpen = document.getElementById("md-open");
+let currentDir = "";
+
+const esc2 = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+function inlineMd(s) {
+  const codes = [];
+  s = esc2(s).replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return "\x00" + (codes.length - 1) + "\x00"; });
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\*([^*\s][^*]*)\*/g, "<em>$1</em>");
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, h) =>
+    /\.md$/i.test(h) ? `<a href="${h}" data-md="${h}">${t}</a>`
+                     : `<a href="${h}" target="_blank" rel="noopener">${t}</a>`);
+  return s.replace(/\x00(\d+)\x00/g, (_, i) => `<code>${codes[+i]}</code>`);
+}
+
+function mdToHtml(md) {
+  const lines = md.split(/\r?\n/);
+  let html = "", i = 0, para = [];
+  const flush = () => { if (para.length) { html += `<p>${inlineMd(para.join(" "))}</p>`; para = []; } };
+  while (i < lines.length) {
+    const L = lines[i];
+    if (/^```/.test(L)) {                                        // code fence
+      flush();
+      const lang = L.slice(3).trim();
+      const code = [];
+      i++;
+      while (i < lines.length && !/^```/.test(lines[i])) code.push(lines[i++]);
+      i++;
+      html += `<pre>${lang ? `<span class="plang">${esc2(lang)}</span>` : ""}<code>${esc2(code.join("\n"))}</code></pre>`;
+      continue;
+    }
+    const h = L.match(/^(#{1,4})\s+(.*)/);                       // heading
+    if (h) { flush(); html += `<h${h[1].length}>${inlineMd(h[2])}</h${h[1].length}>`; i++; continue; }
+    if (/^>\s?/.test(L)) {                                       // blockquote
+      flush();
+      const bq = [];
+      while (i < lines.length && /^>\s?/.test(lines[i])) bq.push(lines[i++].replace(/^>\s?/, ""));
+      html += `<blockquote>${mdToHtml(bq.join("\n"))}</blockquote>`;
+      continue;
+    }
+    if (/^\|/.test(L) && i + 1 < lines.length                    // table
+        && /^\|?[\s:|-]+\|?$/.test(lines[i + 1].trim()) && lines[i + 1].includes("-")) {
+      flush();
+      const cells = r => r.trim().replace(/^\||\|$/g, "").split("|").map(c => inlineMd(c.trim()));
+      const head = cells(L); i += 2;
+      let body = "";
+      while (i < lines.length && /^\|/.test(lines[i])) body += `<tr>${cells(lines[i++]).map(c => `<td>${c}</td>`).join("")}</tr>`;
+      html += `<div class="twrap"><table><tr>${head.map(c => `<th>${c}</th>`).join("")}</tr>${body}</table></div>`;
+      continue;
+    }
+    if (/^\s*([-*]|\d+\.)\s+/.test(L)) {                         // list (checkbox → ☐/☑)
+      flush();
+      const ordered = /^\s*\d+\./.test(L);
+      let items = "";
+      while (i < lines.length && /^\s*([-*]|\d+\.)\s+/.test(lines[i])) {
+        let item = lines[i++].replace(/^\s*([-*]|\d+\.)\s+/, "");
+        while (i < lines.length && /^\s{2,}\S/.test(lines[i]) && !/^\s*([-*]|\d+\.)\s+/.test(lines[i]))
+          item += " " + lines[i++].trim();
+        item = item.replace(/^\[ \]\s*/, "☐ ").replace(/^\[x\]\s*/i, "☑ ");
+        items += `<li>${inlineMd(item)}</li>`;
+      }
+      html += ordered ? `<ol>${items}</ol>` : `<ul>${items}</ul>`;
+      continue;
+    }
+    if (/^---+\s*$/.test(L)) { flush(); html += "<hr>"; i++; continue; }
+    if (L.trim() === "") { flush(); i++; continue; }
+    para.push(L.trim()); i++;
+  }
+  flush();
+  return html;
+}
+
+function resolvePath(href) {
+  const stack = [];
+  for (const p of (currentDir + href).split("/")) {
+    if (p === "." || p === "") continue;
+    if (p === ".." && stack.length && stack[stack.length - 1] !== "..") stack.pop();
+    else stack.push(p);
+  }
+  return stack.join("/");
+}
+
+async function openPreview(f, title) {
+  overlay.style.display = "flex";
+  mdTitle.textContent = title || f.split("/").pop();
+  mdOpen.href = f;
+  mdBody.innerHTML = '<p style="color:var(--muted)">Đang tải…</p>';
+  currentDir = f.slice(0, f.lastIndexOf("/") + 1);
+  try {
+    const res = await fetch(f);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    mdBody.innerHTML = mdToHtml(await res.text());
+    mdBody.scrollTop = 0;
+  } catch (err) {
+    mdBody.innerHTML = `<p><strong>Không tải được file.</strong> (${esc2(String(err))})</p>
+      <p>Vẫn xem được bản gốc qua nút "mở file gốc ↗" phía trên.</p>`;
+  }
+}
+function closePreview() { overlay.style.display = "none"; }
+
+document.getElementById("pclose").onclick = closePreview;
+overlay.addEventListener("click", e => { if (e.target === overlay) closePreview(); });
+mdBody.addEventListener("click", e => {
+  const a = e.target.closest("a[data-md]");
+  if (!a) return;
+  e.preventDefault();
+  const path = resolvePath(a.getAttribute("data-md"));
+  const entry = DATA.find(x => x.f === path || x.f === "./" + path);
+  openPreview(path, entry ? entry.t : path.split("/").pop());
+});
+
+if (location.protocol === "file:") {
+  const hint = document.getElementById("hint");
+  hint.style.display = "block";
+  hint.innerHTML = '⚠️ Đang mở trực tiếp từ ổ đĩa nên preview bị trình duyệt chặn — card sẽ mở file gốc. ' +
+    'Muốn preview trong trang: chạy <code>npx serve</code> trong thư mục này, hoặc VS Code → chuột phải ' +
+    '<code>index.html</code> → <strong>Open with Live Server</strong>.';
+}
+</script>
+</body>
+</html>
