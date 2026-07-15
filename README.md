@@ -8,7 +8,7 @@ cách dùng + copy vào code". Mỗi chủ đề là một file riêng.
 
 ## Assets & Design resources
 
-- [Icons](../icon/README.md) — Icônes, Iconify, Lucide... (đã có)
+- [Icons](icons.md) — Icônes, Iconify, Lucide, copy SVG
 - [Fonts](fonts.md) — Google Fonts, Fontsource, self-host, `font-display`
 - [Colors](colors.md) — palette, HSL, contrast checker (a11y)
 - [Images & Photos](images.md) — Unsplash/Pexels, WebP/AVIF, lazy load
